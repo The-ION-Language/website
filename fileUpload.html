@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ION-Lang Module Submission</title>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('uploadForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(this);
+                const code = (new URLSearchParams(window.location.search)).get('code');
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                    headers: new Headers({
+                        code,
+                        'Content-Type': 'text/plain'
+                    })
+                });
+
+                if (response.statusText !== 'OK') return alert(response.statusText);
+                alert("DONE!");
+                console.log(await response.text());
+                // window.location.href = '/';
+            });
+        })
+    </script>
+</head>
+
+<body>
+    <h1>Upload Your Module</h1>
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" accept=".tgz" name="file">
+        <button type="submit">Upload</button>
+    </form>
+</body>
+
+</html>
