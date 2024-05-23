@@ -61,6 +61,18 @@ app.get('/callback', async (req, res) => {
 
 app.post('/upload', upload.single('file'), async (req, res) => {
 	try {
+		const r = await axios.get('https://api.github.com/repos/The-ION-Language/modules/commits', {
+			headers: {
+				'Authorization': `token ${process.env.GHTOKEN}`
+			}
+		});
+
+		const regex = new RegExp(`^${login}\\s+.*\\s+updated\\s+${packageName}$`);
+		let match = r.data.find(o => regex.test(o.commit.message.toLowerCase()));
+
+		// check if package does not exist
+		if (!match && r.data.find(o => o.endsWith(`updated ${packageName}`))) return res.sendStatus(401);
+
 		if (req.file?.mimetype !== 'application/x-compressed-tar') return res.sendStatus(415);
 
 		const { code } = req.headers;
@@ -70,9 +82,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 		const { login, email } = await validateCode(code);
 		if (!login) return res.sendStatus(401);
 
-		// if (req.file.mimetype !== '')
-
-		await cfs.writeFileSync(req.file.originalname, req.file.buffer, null, `updated ${req.file.originalname.replace('.tgz', '')} ${login}${(email) ? ' (' + email + ')' : ''}`);
+		// make sure the user owns the module
+		
+		const packageName = req.file.originalname.replace('.tgz', '');
+		await cfs.writeFileSync(req.file.originalname, req.file.buffer, null, `${login}${(email) ? ' (' + email + ')' : ''} updated ${packageName}`);
 		res.contentType("text").send(`https://github.com/The-ION-Language/modules/blob/main/${req.file.originalname}`);
 	}
 	catch (err) {
