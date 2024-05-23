@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ION-Lang Module Submission</title>
 
+    <link rel="stylesheet" href="css/fileUpload.css">
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('uploadForm').addEventListener('submit', async function (event) {
@@ -33,11 +34,13 @@
 </head>
 
 <body>
-    <h1>Upload Your Module</h1>
-    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" accept=".tgz" name="file">
-        <button type="submit">Upload</button>
-    </form>
+    <div class="container">
+        <h1>Upload Your Module</h1>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" accept=".tgz" name="file" class="file-input">
+            <button type="submit" class="btn">Upload</button>
+        </form>
+    </div>
 </body>
 
 </html>

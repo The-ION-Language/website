@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ION Lang Home</title>
+    <link rel="stylesheet" href="css/index.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const installBtn = document.getElementById('installBtn');
+            const dropdown = document.getElementById('dropdown');
+
+            installBtn.addEventListener('click', () => {
+                if (dropdown.classList.contains('open')) {
+                    dropdown.classList.remove('open');
+                } else {
+                    dropdown.classList.add('open');
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <img src="https://github.com/The-ION-Language/ION-Lang/blob/main/assets/ION_LANG_LOGO.png?raw=true"
+                alt="ION Lang Logo" class="logo">
+            <h1>Welcome to ION Lang</h1>
+        </header>
+        <main>
+            <p>My attempt at a custom programming language!</p>
+            <div class="install-container">
+                <a class="btn" id="installBtn">Install ION Lang</a>
+                <div class="dropdown" id="dropdown">
+                    <p>Run the following command to install:</p>
+                    <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ION606/ION-Lang/main/utils/install.sh)"</code>
+                </div>
+            </div>
+            
+            <a href="newmodule" class="btn" style="margin-bottom: 7px;">Upload Module</a><br>
+
+            <a href="https://github.com/The-ION-Language" class="btn">GitHub</a>
+        </main>
+    </div>
+</body>
+
+</html>

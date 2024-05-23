@@ -5,18 +5,20 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ION Lang GitHub Login</title>
-
+	<link rel="stylesheet" href="css/login.css">
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			const ll = document.querySelector('#loginlink');
-			ll.href = `https://github.com/login/oauth/authorize?client_id={{GITHUB_CLIENT_ID}}&scope=read:user%20user:email&redirect_uri=https://ion-language-website.onrender.com/callback`
+			ll.href = `https://github.com/login/oauth/authorize?client_id={{GITHUB_CLIENT_ID}}&scope=read:user%20user:email&redirect_uri=https://ionlang.ion606.com/callback`;
 		});
 	</script>
 </head>
 
 <body>
-	<h1>GitHub OAuth Login</h1>
-	<a id="loginlink">Login with GitHub</a>
+	<div class="container">
+		<h1>ION Language Module Upload</h1>
+		<a id="loginlink" class="btn">Login with GitHub</a>
+	</div>
 </body>
 
 </html>

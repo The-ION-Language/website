@@ -6,14 +6,17 @@ import customFS from 'github-to-fs';
 import fs, { fstat } from 'fs';
 
 const app = express();
+app.use('/css', express.static('CSS'));
 const upload = multer({ storage: multer.memoryStorage() });
 const cfs = new customFS('https://api.github.com/repos/The-ION-Language/modules', process.env.GHTOKEN);
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
+app.get('/newmodule', (_, res) => {
 	res.send(fs.readFileSync('login.html').toString().replace('{{GITHUB_CLIENT_ID}}', process.env.GITHUB_CLIENT_ID));
 });
+
+app.get('/', (_, res) => res.sendFile('index.html', { root: '.' }));
 
 
 async function validateCode(requestToken) {
@@ -33,7 +36,7 @@ async function validateCode(requestToken) {
 
 	if (!tokenResponse.data.code && !tokenResponse.data.access_token) return false;
 	const token = tokenResponse.data.access_token || tokenResponse.data.code;
-	
+
 	const userResponse = await axios.get('https://api.github.com/user', {
 		headers: {
 			Authorization: `token ${token}`,
@@ -79,6 +82,4 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 
-app.listen(PORT, () => {
-	console.log(`Server is running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`));
