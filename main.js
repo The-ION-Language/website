@@ -73,7 +73,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 		// if (req.file.mimetype !== '')
 
 		await cfs.writeFileSync(req.file.originalname, req.file.buffer, null, `updated ${req.file.originalname.replace('.tgz', '')} ${login}${(email) ? ' (' + email + ')' : ''}`);
-		res.contentType("text").send(`uploaded module to https://github.com/The-ION-Language/modules/blob/main/${req.file.originalname}`);
+		res.contentType("text").send(`https://github.com/The-ION-Language/modules/blob/main/${req.file.originalname}`);
 	}
 	catch (err) {
 		console.error(err);

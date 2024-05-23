@@ -19,15 +19,15 @@
                     method: 'POST',
                     body: formData,
                     headers: new Headers({
-                        code,
-                        'Content-Type': 'text/plain'
+                        code
                     })
                 });
 
                 if (response.statusText !== 'OK') return alert(response.statusText);
-                alert("DONE!");
-                console.log(await response.text());
-                // window.location.href = '/';
+                document.querySelector("#statusTitle").textContent = "Module Uploaded!";
+
+                const newHref = await response.text();
+                document.getElementById('uploadForm').innerHTML = `<p>uploaded module to <a href="${newHref}" target="_blank">${newHref}</a></p><br><button type="submit" onclick="window.location.href = '/'" class="btn">Home</button>`;
             });
         })
     </script>
@@ -35,7 +35,7 @@
 
 <body>
     <div class="container">
-        <h1>Upload Your Module</h1>
+        <h1 id="statusTitle">Upload Your Module</h1>
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" accept=".tgz" name="file" class="file-input">
             <button type="submit" class="btn">Upload</button>
