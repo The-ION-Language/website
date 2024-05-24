@@ -12,7 +12,7 @@
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			const ll = document.querySelector('#loginlink');
-			ll.href = `https://github.com/login/oauth/authorize?client_id={{GITHUB_CLIENT_ID}}&scope=read:user%20user:email&redirect_uri=https://ionlang.ion606.com/callback`;
+			ll.href = `https://github.com/login/oauth/authorize?client_id={{GITHUB_CLIENT_ID}}&scope=read:user%20user:email%20public_repo:read&redirect_uri=https://ionlang.ion606.com/callback`;
 		});
 	</script>
 </head>

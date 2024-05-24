@@ -1,13 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import multer from 'multer';
 import customFS from 'github-to-fs';
+import bodyParser from 'body-parser';
 import fs, { fstat } from 'fs';
 
 const app = express();
 app.use('/css', express.static('CSS'));
-const upload = multer({ storage: multer.memoryStorage() });
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+
 const cfs = new customFS('https://api.github.com/repos/The-ION-Language/modules', process.env.GHTOKEN);
 
 const PORT = process.env.PORT || 3000;
@@ -34,7 +37,7 @@ async function validateCode(requestToken) {
 		}
 	);
 
-	if (!tokenResponse.data.code && !tokenResponse.data.access_token) return false;
+	if (!tokenResponse.data.code && !tokenResponse.data.access_token) return tokenResponse.data;
 	const token = tokenResponse.data.access_token || tokenResponse.data.code;
 
 	const userResponse = await axios.get('https://api.github.com/user', {
@@ -59,34 +62,37 @@ app.get('/callback', async (req, res) => {
 });
 
 
-app.post('/upload', upload.single('file'), async (req, res) => {
+app.post('/upload', async (req, res) => {
 	try {
-		const r = await axios.get('https://api.github.com/repos/The-ION-Language/modules/commits', {
+		const { code, repourl } = req.headers;
+		if (!code) return res.sendStatus(404);
+
+		const conf = (await axios.get(repourl)).data,
+			confContent = JSON.parse(atob(conf.content).toString());
+
+		const { packageName, login: lOG, repourl: repourlOG } = confContent;
+		if (!packageName || !lOG | !repourlOG) return res.sendStatus(403);
+
+		// make sure the user is authorized
+		const authR = await validateCode(code),
+			{ login, email } = authR;
+		if (!login) return res.status(401).send(authR);
+
+		// check for package in the repo
+		let confMain = await axios.get(`https://api.github.com/repos/The-ION-Language/modules/contents/modules/${packageName}.json`, {
 			headers: {
 				'Authorization': `token ${process.env.GHTOKEN}`
 			}
-		});
+		}).then(d => JSON.parse(atob(d.data.content).toString())).catch(_ => null);
 
-		if (req.file?.mimetype !== 'application/x-compressed-tar') return res.sendStatus(415);
+		if (confMain) {
+			if (repourl !== confMain.repourl || login !== confMain.login) return res.sendStatus(403);
+			confMain['version'] = (confMain['version']) ? Number(confMain['version']) + 1 : 1;
+		}
+		else confMain = confContent;
 
-		const { code } = req.headers;
-		if (!code) return res.sendStatus(401);
-
-		// make sure the user is authorized
-		const { login, email } = await validateCode(code);
-		if (!login) return res.sendStatus(401);
-
-		const packageName = req.file.originalname.replace('.tgz', '');
-
-		// make sure the user owns the module
-		const regex = new RegExp(`^${login}\\s+.*\\s+updated\\s+${packageName}$`);
-		let match = r.data.find(o => regex.test(o.commit.message.toLowerCase()));
-
-		// check if package does not exist
-		if (!match && r.data.find(o => o.commit.message.endsWith(`updated ${packageName}`))) return res.sendStatus(401);
-		
-		await cfs.writeFileSync(req.file.originalname, req.file.buffer, null, `${login}${(email) ? ' (' + email + ')' : ''} updated ${packageName}`);
-		res.contentType("text").send(`https://github.com/The-ION-Language/modules/blob/main/${req.file.originalname}`);
+		await cfs.writeFileSync(`modules/${packageName}.json`, JSON.stringify(confMain), null, `${login}${(email) ? ' (' + email + ')' : ''} updated ${packageName}`);
+		res.contentType("text").status(200).send(`https://github.com/The-ION-Language/modules/blob/main/modules/${packageName}.json`);
 	}
 	catch (err) {
 		console.error(err);

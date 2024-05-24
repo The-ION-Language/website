@@ -7,25 +7,75 @@
     <title>ION-Lang Module Submission</title>
 
     <link rel="stylesheet" href="css/fileUpload.css">
-    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/The-ION-Language/ION-Lang/main/assets/ION_LANG_LOGO.png">
-    
+    <link rel="icon" type="image/x-icon"
+        href="https://raw.githubusercontent.com/The-ION-Language/ION-Lang/main/assets/ION_LANG_LOGO.png">
+
     <script>
+        let l;
+
+        async function findUsername() {
+            const t = document.querySelector('#username');
+            const r = await fetch(`https://api.github.com/users/${document.querySelector('#username').value}/repos`);
+
+            const container = document.createElement('div');
+            container.classList.add('container');
+
+            const selectMenu = document.createElement('select');
+            selectMenu.innerHTML = `<option value="" disabled selected>Select a repository</option>`;
+            selectMenu.className = 'repo-select';
+            selectMenu.id = 'repoSelect';
+
+            (await r.json()).forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo.contents_url.replace("{+path}", '');
+                option.textContent = repo.name;
+                selectMenu.appendChild(option);
+            });
+
+            container.appendChild(selectMenu);
+            t.replaceWith(container);
+
+            document.querySelector('button[type="submit"]').style.display = 'inline-block';
+            document.querySelector('#usernamelabel').remove();
+        }
+
+        const waitForChange = (e) => {
+            clearTimeout(l);
+            l = setTimeout(findUsername, 2000);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#username').addEventListener('input', waitForChange);
+
             document.getElementById('uploadForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
 
-                const formData = new FormData(this);
-                const code = (new URLSearchParams(window.location.search)).get('code');
+                const code = (new URLSearchParams(window.location.search)).get('code'),
+                    repourl = `${document.querySelector('#repoSelect').value}bundleinfo.json`,
+                    r = await fetch(repourl),
+                    j = atob((await r.json()).content);
+
+                if (!j) return alert("CONFIG FILE NOT FOUND!");
 
                 const response = await fetch('/upload', {
                     method: 'POST',
-                    body: formData,
                     headers: new Headers({
-                        code
+                        code,
+                        repourl,
                     })
                 });
 
-                if (response.statusText !== 'OK') return alert(response.statusText);
+                if (response.statusText !== 'OK') {
+                    const txt = await response.text();
+
+                    try {
+                        const r = JSON.parse(txt);
+                        return alert(`ERROR!!!\n${r.error}\n${r.error_description}`);
+                    }
+                    catch(err) {
+                        return alert(response.statusText);
+                    }
+                }
                 document.querySelector("#statusTitle").textContent = "Module Uploaded!";
 
                 const newHref = await response.text();
@@ -39,8 +89,9 @@
     <div class="container">
         <h1 id="statusTitle">Upload Your Module</h1>
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" accept=".tgz" name="file" class="file-input">
-            <button type="submit" class="btn">Upload</button>
+            <label id="usernamelabel" for="username">Github Username</label><input type="text" id="username"
+                class="file-input" onKeyUp="waitForChange(Event)">
+            <button style="display: none;" type="submit" class="btn">Upload</button>
         </form>
     </div>
 </body>
