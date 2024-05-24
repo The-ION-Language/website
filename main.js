@@ -77,7 +77,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 		if (!login) return res.sendStatus(401);
 
 		const packageName = req.file.originalname.replace('.tgz', '');
-		
+
 		// make sure the user owns the module
 		const regex = new RegExp(`^${login}\\s+.*\\s+updated\\s+${packageName}$`);
 		let match = r.data.find(o => regex.test(o.commit.message.toLowerCase()));
