@@ -83,7 +83,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 		let match = r.data.find(o => regex.test(o.commit.message.toLowerCase()));
 
 		// check if package does not exist
-		if (!match && r.data.find(o => o.endsWith(`updated ${packageName}`))) return res.sendStatus(401);
+		if (!match && r.data.find(o => o.commit.message.endsWith(`updated ${packageName}`))) return res.sendStatus(401);
 		
 		await cfs.writeFileSync(req.file.originalname, req.file.buffer, null, `${login}${(email) ? ' (' + email + ')' : ''} updated ${packageName}`);
 		res.contentType("text").send(`https://github.com/The-ION-Language/modules/blob/main/${req.file.originalname}`);
