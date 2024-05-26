@@ -1,9 +1,9 @@
 import express from 'express';
-import cors from 'cors';
 import axios from 'axios';
 import customFS from 'github-to-fs';
 import bodyParser from 'body-parser';
 import fs, { fstat } from 'fs';
+
 
 const app = express();
 app.use('/css', express.static('CSS'));
